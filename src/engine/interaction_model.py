@@ -1,10 +1,12 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(1, os.getcwd())
 
-from memorization import MemoryManager
 from openai import OpenAI
 import json
+
+from src.engine.memorization import MemoryManager
+from src.utils import LogSystem
 
 class InteractionModel:
     """
@@ -25,6 +27,9 @@ class InteractionModel:
         
         self._memory = MemoryManager()
         self._memory.add_prompt(self._prompt)
+        
+        self._im_log = LogSystem("interaction_model")
+        self._im_log("Interaction model initialized.")
         
     def _parse_response(self, response: str):
         lines = response.strip().splitlines()
@@ -55,7 +60,7 @@ class InteractionModel:
         Returns:
             response (str, list): The response from the model, the string is the response and the list is the commands.
         """
-        print(f"Received message: {message}")
+        self._im_log(f"Received message from user: {message}", True)
         completion = self._interactor.chat.completions.create(
             model=self._model_name,
             temperature=self._temperature,
@@ -63,8 +68,13 @@ class InteractionModel:
             messages=self._memory.get_memory() + [{"role": "user", "content": message}]
         )
         
+        self._im_log("Processing response from model...")
         talk_response, commands = self._parse_response(completion.choices[0].message.content)
+        self._im_log(f"Response from model: {talk_response}", True)
+        self._im_log(f"Commands from model: {commands}", True)
         
         self._memory.add_message("user", message)
         self._memory.add_message("assistant", talk_response)
+        
+        self._im_log("Response processed.\nUpdated memory: \n" + str(self._memory))
         return talk_response, commands
