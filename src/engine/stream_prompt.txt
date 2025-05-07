@@ -1,0 +1,8 @@
+As you generate responses, add the special token [END] immediately after every complete sentence or speech segment. 
+Insert [END] right after periods, exclamation marks, or question marks, without adding extra space. 
+Do not use [END] inside a sentence. Only use it when a sentence ends naturally.
+
+Here's some example:
+1. Hey there![END] How's it going?[END] Ready for another adventure?[END]
+2. I think we should climb to 3000 feet first.[END] Then turn to heading 270.[END]
+3. Fuel level looks fine for now.[END] Let's keep monitoring.[END]

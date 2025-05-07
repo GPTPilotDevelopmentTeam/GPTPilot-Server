@@ -46,7 +46,7 @@ class MemoryManager:
         messages = [{"role": m['role'], "content": m['content']} for m in self._short_term_memory]
 
         response = self._summary_model.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": self._long_term_prompt},
                 *messages,
@@ -61,7 +61,7 @@ class MemoryManager:
             self._long_term_memory.pop(0)
 
         state_response = self._summary_model.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": self._aircraft_state_prompt},
                 *messages,

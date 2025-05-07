@@ -1,1 +1,1 @@
-from .interaction_model import InteractionModel
+from .interaction_model import InteractionModel, StreamInteractionModel
