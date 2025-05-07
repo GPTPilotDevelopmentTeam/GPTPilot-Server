@@ -105,11 +105,15 @@ class StreamInteractionModel:
         
     def _parse_message(self, stream):
         text_buf = ""
+        self._is_interrupted = False
         for event in stream:
             content = event.choices[0].delta.content
             
             if content is None:
                 continue
+            if self._is_interrupted:
+                return
+            
             text_buf += content
 
             if '[END]' in text_buf:
@@ -132,6 +136,7 @@ class StreamInteractionModel:
             messages=self._memory.get_memory() + [{"role": "user", "content": message}], 
             stream=True
         )
+        self._is_interrupted = True
         
         self.log("Returning generator")
         return self._parse_message(stream)
