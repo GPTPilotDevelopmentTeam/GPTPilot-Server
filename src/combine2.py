@@ -16,6 +16,7 @@ def callback(text):
     
 stt.set_transcription_callback(callback)
 stt.start()
+tts.start()
 
 while True:
     time.sleep(1)

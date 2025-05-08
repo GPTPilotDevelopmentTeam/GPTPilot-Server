@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '')))
 
 from src.engine import InteractionModel
-from src.app.tts import text_to_speech
+from src.app.tts_engine.openai_tts import text_to_speech
 
 model = InteractionModel()
 while True:
