@@ -1,12 +1,11 @@
-import sys
-import os
-sys.path.insert(1, os.getcwd())
-
 from openai import OpenAI
 import json
+import sys
+import os
 
-from src.engine.memorization import MemoryManager
+sys.path.insert(1, os.getcwd())
 from src.utils import LogSystem
+from src.engine.memorization import MemoryManager
 
 class InteractionModel:
     """
