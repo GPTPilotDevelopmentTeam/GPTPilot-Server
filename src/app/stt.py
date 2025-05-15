@@ -28,7 +28,7 @@ SAMPLE_RATE = 16000
 BLOCK_SIZE = 1024
 """Number of samples read each time."""
 
-MAX_RECORDING_DURATION = 10.0
+MAX_RECORDING_DURATION = 5.0
 """Maximum recording duration (seconds)."""
 
 _is_running = False

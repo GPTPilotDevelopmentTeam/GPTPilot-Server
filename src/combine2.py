@@ -8,6 +8,7 @@ def callback(text):
     global model
     print(f'User says: {text}')
     gen = model.send_message(text)
+    tts.interrupt()
     
     for g in gen:
         print(f'processing: {g}')

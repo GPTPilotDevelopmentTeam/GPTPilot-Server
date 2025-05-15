@@ -29,6 +29,19 @@ def _play_audio():
             _audio_chart.pop(id)
         else:
             time.sleep(.5)
+            
+def interrupt():
+    global _thread_pool, _audio_chart
+    while True:
+        try:
+            thread = _thread_pool.get_nowait()
+            thread.join()
+            if thread.ident in _audio_chart:
+                os.remove(_audio_chart[thread.ident])
+                _audio_chart.pop(thread.ident)
+            _thread_pool.task_done()
+        except:
+            break  # Queue is empty, exit the loop
 
 def start(proc_func='whisper'):
     global _processing_func, _proc_funcs, _audio_player
