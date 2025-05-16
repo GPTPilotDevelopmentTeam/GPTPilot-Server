@@ -14,7 +14,6 @@ def callback(text):
         print(f'processing: {g}')
         tts.text_to_speech(g)
     
-    
 stt.set_transcription_callback(callback)
 stt.start()
 tts.start()
