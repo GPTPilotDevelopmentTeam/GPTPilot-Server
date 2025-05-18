@@ -141,4 +141,37 @@ class StreamInteractionModel:
         self.log("Returning generator")
         return self._parse_message(stream)
     
-   
+class ActionDeterminationModel:
+    def __init__(self, output_callback=None):
+        self._interactor = OpenAI(
+            api_key=os.environ.get("OPENAI_API_KEY"),
+        )
+        self._model_name = 'gpt-4o-mini'
+        self._temperature = 0.7
+        self._max_tokens = 1000
+        
+        with open('src/engine/action_prompt.txt', 'r', encoding='utf-8') as f:
+            self._prompt = f.read()
+            f.close()
+            
+        if output_callback is None:
+            self._output_callback = lambda x: print(x)
+        else:
+            self._output_callback = output_callback
+        
+        self.log = LogSystem("action_determination_model")
+        self.log("Action determination model initialized.")
+        
+    def analyzing_message(self, message: str):
+        self.log(f"Received message: {message}", True)
+        completion = self._interactor.chat.completions.create(
+            model=self._model_name,
+            temperature=self._temperature,
+            max_tokens=self._max_tokens,
+            messages=[{'role': 'system', 'content': self._prompt}, {"role": "user", "content": message}]
+        )
+        
+        self.log("Processing response from model...")
+        jsons = completion.choices[0].message.content
+        
+        self._output_callback(jsons)
