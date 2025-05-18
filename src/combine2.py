@@ -1,8 +1,9 @@
 from app import stt, tts
-from engine import StreamInteractionModel
+from engine import StreamInteractionModel, ActionDeterminationModel
 import time
 
 model = StreamInteractionModel()
+action = ActionDeterminationModel()
 
 def callback(text):
     global model
@@ -12,6 +13,7 @@ def callback(text):
     
     for g in gen:
         print(f'processing: {g}')
+        action.analyzing_message(g)
         tts.text_to_speech(g)
     
 stt.set_transcription_callback(callback)

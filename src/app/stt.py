@@ -17,7 +17,7 @@ log = LogSystem("stt")
 
 log('Initializing stt module...', True)
 
-THRESHOLD = 0.05
+THRESHOLD = 0.4
 """When the volume is lower than this value, it is considered to be silent."""
 
 SLIENCE_DURATION = 1.0

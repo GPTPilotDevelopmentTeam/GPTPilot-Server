@@ -1,5 +1,5 @@
 As you generate responses, add the special token [END] immediately after every complete sentence or speech segment. 
-Insert [END] right after periods, exclamation marks, or question marks, without adding extra space. 
+Insert [END] right after every . ? ! and so on..., without adding extra space. 
 Do not use [END] inside a sentence. Only use it when a sentence ends naturally.
 
 Here's some example:
