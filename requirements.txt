@@ -1,0 +1,8 @@
+sounddevice
+torch --index-url https://download.pytorch.org/whl/cu128
+torchvision --index-url https://download.pytorch.org/whl/cu128
+torchaudio --index-url https://download.pytorch.org/whl/cu128
+numpy
+openai-whisper
+pygame
+openai
