@@ -17,7 +17,7 @@ log = LogSystem("stt")
 
 log('Initializing stt module...', True)
 
-THRESHOLD = 0.05
+THRESHOLD = 2.5
 """When the volume is lower than this value, it is considered to be silent."""
 
 SLIENCE_DURATION = 1.0
@@ -46,7 +46,7 @@ _audio_transcribing_thread = None
 _monitoring_thread = None
 """"Thread for monitoring microphone and detecting speech."""
 
-_model_name = 'turbo'
+_model_name = 'base'
 
 try:
     _model = whisper.load_model(_model_name).to("cuda")
