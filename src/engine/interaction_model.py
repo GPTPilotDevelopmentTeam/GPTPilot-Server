@@ -128,11 +128,12 @@ class StreamInteractionModel:
 
     def send_message(self, message: str):
         self.log(f"Received message from user: {message}", True)
+        self._memory.add_message("user", message)
         stream = self._interactor.chat.completions.create(
             model=self._model_name,
             temperature=self._temperature,
             max_tokens=self._max_tokens,
-            messages=self._memory.get_memory() + [{"role": "user", "content": message}], 
+            messages=self._memory.get_memory(), 
             stream=True
         )
         self._is_interrupted = True
