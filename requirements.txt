@@ -6,3 +6,4 @@ numpy
 openai-whisper
 pygame
 openai
+sounndfile

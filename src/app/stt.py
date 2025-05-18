@@ -1,12 +1,12 @@
 from queue import Queue
 from threading import Thread
+from openai import OpenAI
 import sounddevice as sd
 import numpy as np
-import whisper
 import sys
 import os
-import io
-import contextlib
+import tempfile
+import soundfile as sf
 import time
 
 sys.path.insert(1, os.getcwd())
@@ -16,6 +16,8 @@ log = LogSystem("stt")
 """Log system for STT."""
 
 log('Initializing stt module...', True)
+
+client = OpenAI()
 
 THRESHOLD = 0.4
 """When the volume is lower than this value, it is considered to be silent."""
@@ -45,16 +47,6 @@ _audio_transcribing_thread = None
 
 _monitoring_thread = None
 """"Thread for monitoring microphone and detecting speech."""
-
-_model_name = 'turbo'
-
-try:
-    _model = whisper.load_model(_model_name).to("cuda")
-    log('[STT]: Find gpu.', True)
-except:
-    _model = whisper.load_model(_model_name).to("cpu")
-    log('[STT]: GPU not found, using cpu.', True)
-"""The Whisper model."""
 
 def _monitor_microphone():
     """Background thread that monitors the microphone, detects speech, and pushes audio to the queue."""
@@ -119,16 +111,20 @@ def _transcribing_audio():
         log(f"Transcribing audio with {len(audio) / SAMPLE_RATE:.2f} seconds...")
 
         # Redirect verbose output to a string
-        verbose_output = io.StringIO()
-        with contextlib.redirect_stdout(verbose_output):
-            result = _model.transcribe(audio, verbose=True)
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+            sf.write(tmp_wav.name, audio, SAMPLE_RATE)
+            tmp_wav.flush()
 
-        text = result["text"]
-        verbose_log = verbose_output.getvalue()  # Get the verbose output as a string
-        verbose_output.close()
-
-        _transcription_callback(text)
-        log(f"Verbose output:\n{verbose_log}")
+            try:
+                result = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=open(tmp_wav.name, "rb"),
+                    response_format="text"
+                )
+                _transcription_callback(result.strip())
+                log(f"Transcribed: {result.strip()}")
+            except Exception as e:
+                log(f"[Error] OpenAI API transcription failed: {str(e)}", True)
 
 
 def set_transcription_callback(callback):
