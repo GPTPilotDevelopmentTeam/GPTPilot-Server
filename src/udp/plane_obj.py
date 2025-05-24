@@ -1,3 +1,21 @@
+INFO = {
+    1: ['real time', 'total time', 'mission time', 'timer', None, 'zulu time', 'local time', 'hobbs time'],
+    3: [None] * 3 + ['speed'] + [None] * 4,
+    13: ['trim_elev', 'trim_ailrn', 'trim_rudder', 'requested_flap', 'actual_flap', 'slat_ratio', 'requested_speedbrake', 'actual_speedbrake'],
+    14: ['gear_status', 'wheel_brake'] + [None] * 6,
+    17: ['Pitch', 'Roll', 'Heading'] + [None] * 5,
+    20: ['latitude', 'longitude', 'altitude', 'gear altitude'] + [None] * 4,
+    25: ['left requested throttle', 'right requested throttle'] + [None] * 6,
+    26: ['left actual throttle', 'right actual throttle'] + [None] * 6,
+    34: ['left engine power (hp)', 'right engine power (hp)'] + [None] * 6,
+    35: ['left engine thrust (lb)', 'right engine thrust (lb)'] + [None] * 6,
+    37: ['left engine RPM', 'right engine RPM'] + [None] * 6,
+    62: ['left fuel weight', 'center fuel weight', 'right fuel weight'] + [None] * 5,
+    117: ['audo_throttle', 'auto heading mode', 'auto altitude mode', None, 'bac', 'approaching', None, 'sync button'],
+    118: ['ap airspeed', 'ap heading', 'ap vs', 'ap altitude'] + [None] * 4,
+    121: ['APU is running', 'APU N1', 'APU rat', 'GPU rat', 'RAT rat', 'APU amp', 'GPU amp', 'RAT amp']
+}
+
 class Plane:
     def __init__(self):
         self.data = {}
@@ -9,6 +27,18 @@ class Plane:
     def get_data(self, index):
         """取得某個 index 的資料（回傳 tuple of 8 floats，若無則回傳 8 個 0.0）"""
         return self.data.get(index, [0.0,] * 8)
+    
+    def __str__(self):
+        str_list = []
+        global INFO
+        for k, v in self.data.items():
+            if k not in INFO.keys():
+                continue
+            for i in range(8):
+                if i < len(INFO[k]) and INFO[k][i] is not None:
+                    str_list.append(f'{INFO[k][i]}: {v[i]}\n')
+                    
+        return ''.join(str_list)
 
     # --- Index 3: 姿態 (Heading, Pitch, Roll) ---
     def get_heading(self): return self.get_data(3)[0]
