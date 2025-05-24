@@ -134,13 +134,14 @@ class StreamInteractionModel:
     def send_message(self, message: str, plane=None):
         """This function will send a message to the model and return a generator that yields the response."""
         
+        plane_state = {'role': 'system', 'content': 'The current state of the plane is ' + str(plane)} if plane else {'role': 'system', 'content': 'The current state of the plane is unknown.'}
         self.log(f"Received message from user: {message}", True)
         self._memory.add_message("user", message)
         stream = self._interactor.chat.completions.create(
             model=self._model_name,
             temperature=self._temperature,
             max_tokens=self._max_tokens,
-            messages=self._memory.get_memory(), 
+            messages=[plane_state] + self._memory.get_memory(), 
             stream=True
         )
         self._is_interrupted = True
