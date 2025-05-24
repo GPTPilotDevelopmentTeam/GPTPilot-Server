@@ -1,13 +1,8 @@
 import socket
 import struct
-import threading
-import time
-from plane_obj import Plane
 
 UDP_IP = "0.0.0.0"  # listen on all interfaces
 UDP_PORT = 49002    # default X-Plane UDP port
-
-plane = Plane()
 
 def parse_xplane_data_packet(packet: bytes):
     """解析 X-Plane UDP 封包，回傳 list of (index, [floats])"""
@@ -42,12 +37,3 @@ def onpen_udp_port(plane, lock):
         with lock:
             for index, values in chunks:
                 plane.set_data(index, values)
-
-if __name__ == "__main__":
-    lock = threading.Lock()
-    udp_thread = threading.Thread(target=onpen_udp_port, args=(plane, lock), daemon=True)
-    udp_thread.start()
-
-    while True:
-        print(plane)
-        time.sleep(1)

@@ -9,6 +9,11 @@ from src.engine.memorization import MemoryManager
 
 class InteractionModel:
     """
+    Legacy version of the interaction model.
+    
+    It is slower than the streaming version, but more stable and easier to use.
+    If not persuing for faster response, you can use this model.
+    
     This class is responsible for the interaction between the user and the pilot.
     By using SendMessage function, the user can send a message to the model and get a response as well as a command.
     """
@@ -126,7 +131,9 @@ class StreamInteractionModel:
             self._memory.add_message('assistant', text_buf)
             yield text_buf
 
-    def send_message(self, message: str):
+    def send_message(self, message: str, plane=None):
+        """This function will send a message to the model and return a generator that yields the response."""
+        
         self.log(f"Received message from user: {message}", True)
         self._memory.add_message("user", message)
         stream = self._interactor.chat.completions.create(

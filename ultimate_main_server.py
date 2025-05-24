@@ -3,6 +3,7 @@ import time
 from src import Server
 from src.app import stt, tts
 from src.engine import StreamInteractionModel
+from src.udp import Plane
 
 model = StreamInteractionModel()
 
@@ -23,6 +24,7 @@ if __name__ == '__main__':
     tts.start()
     server_instance = Server()
     server_instance.run_tcp_server()
+    plane_instance = Plane()
     try:
         while True:
            time.sleep(1)
