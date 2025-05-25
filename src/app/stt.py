@@ -11,6 +11,7 @@ import time
 
 sys.path.insert(1, os.getcwd())
 from src.utils import LogSystem
+from src import ui
 
 log = LogSystem("stt")
 """Log system for STT."""
@@ -18,10 +19,10 @@ log = LogSystem("stt")
 log('Initializing stt module...', True)
 
 
-THRESHOLD = 2.5
+THRESHOLD = 0.01
 """When the volume is lower than this value, it is considered to be silent."""
 
-SLIENCE_DURATION = 1.0
+SLIENCE_DURATION = 5.0
 """How long to pause before considering it finished (seconds)."""
 
 SAMPLE_RATE = 16000
@@ -29,7 +30,7 @@ SAMPLE_RATE = 16000
 BLOCK_SIZE = 1024
 """Number of samples read each time."""
 
-MAX_RECORDING_DURATION = 5.0
+MAX_RECORDING_DURATION = 10.0
 """Maximum recording duration (seconds)."""
 
 _is_running = False
@@ -57,6 +58,12 @@ except:
     log('[STT]: GPU not found, using cpu.', True)
 """The Whisper model."""
 
+ui.set_stt_status(
+    threshold=THRESHOLD,
+    silence_limit=SLIENCE_DURATION,
+    max_duration=MAX_RECORDING_DURATION
+)
+
 def _monitor_microphone():
     """Background thread that monitors the microphone, detects speech, and pushes audio to the queue."""
     global _is_running, _transcription_queue
@@ -66,7 +73,6 @@ def _monitor_microphone():
     stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype='float32', blocksize=BLOCK_SIZE)
 
     with stream:
-        # 預熱避免啟動延遲
         for _ in range(3):
             stream.read(BLOCK_SIZE)
 
@@ -75,19 +81,43 @@ def _monitor_microphone():
         has_speak = False
 
         while _is_running:
+            # === Read audio data from the microphone ===
+            # The recording will be triggered when the microphone detects speech.
             audio_block, _ = stream.read(BLOCK_SIZE)
             audio_block = np.squeeze(audio_block)
-
-            recording.append(audio_block)
-
-            volume_norm = np.linalg.norm(audio_block)  # Measure volume intensity
-
-            if volume_norm < THRESHOLD:
-                silent_chunks += 1
+            
+            volume_rms = np.sqrt(np.mean(audio_block**2))
+            is_silent= volume_rms < THRESHOLD
+            
+            if is_silent:
+                if has_speak:
+                    silent_chunks += 1
+                    recording.append(audio_block)
+                    ui.set_stt_status(silence_sec=silent_chunks * (BLOCK_SIZE / SAMPLE_RATE), volume=0.0)
             else:
-                silent_chunks = 0  # Reset if there is sound
+                silent_chunks = 0
                 has_speak = True
+                recording.append(audio_block)
+                ui.set_stt_status(silence_sec=0.0, volume=volume_rms)
+                
+            ui.set_stt_status(record_sec=len(recording) * (BLOCK_SIZE / SAMPLE_RATE))
 
+            # recording.append(audio_block)
+            # ui.set_stt_status(record_sec=len(recording) * (BLOCK_SIZE / SAMPLE_RATE))
+
+            # volume_rms = np.sqrt(np.mean(audio_block**2))
+
+            # if volume_rms < THRESHOLD:
+            #     silent_chunks += 1
+            #     if  has_speak:
+            #         ui.set_stt_status(silence_sec=silent_chunks * (BLOCK_SIZE / SAMPLE_RATE), volume=0.0)
+            # else:
+            #     silent_chunks = 0  # Reset if there is sound
+            #     has_speak = True
+            #     ui.set_stt_status(silence_sec=0.0, volume=volume_rms)
+
+            # === Final check for silence and speech detection ===
+            # If the microphone has been silent for a certain duration
             if silent_chunks * (BLOCK_SIZE / SAMPLE_RATE) > SLIENCE_DURATION and has_speak:
                 audio = np.concatenate(recording)
                 log(f"Detected speech with {len(audio) / SAMPLE_RATE:.2f} seconds.")
@@ -95,7 +125,13 @@ def _monitor_microphone():
                 recording = []
                 silent_chunks = 0
                 has_speak = False
+                
+                ui.set_stt_status(
+                    silence_sec=0.0,
+                    record_sec=0.0
+                )
 
+            # If the recording exceeds the maximum duration
             if len(recording) * (BLOCK_SIZE / SAMPLE_RATE) > MAX_RECORDING_DURATION:
                 if has_speak:
                     audio = np.concatenate(recording)
@@ -106,6 +142,11 @@ def _monitor_microphone():
                 recording = []
                 silent_chunks = 0
                 has_speak = False
+                
+                ui.set_stt_status(
+                    silence_sec=0.0,
+                    record_sec=0.0
+                )
 
 
 def _transcribing_audio():
@@ -130,6 +171,7 @@ def _transcribing_audio():
 
         _transcription_callback(text)
         log(f"Verbose output:\n{verbose_log}")
+        ui.set_stt_status(text=text)
 
 
 def set_transcription_callback(callback):

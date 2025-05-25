@@ -2,6 +2,8 @@ from src import Server
 from src.app import stt, tts
 from src.engine import StreamInteractionModel
 from src.udp import Plane
+from src import ui
+import time
 
 model = StreamInteractionModel()
 plane_instance = Plane()
@@ -23,9 +25,9 @@ if __name__ == '__main__':
     tts.start()
     server_instance = Server()
     server_instance.run_tcp_server()
+    ui.run()
     try:
         while True:
-            s = input()
-            callback(s)
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Main program interrupted. Exiting...")
