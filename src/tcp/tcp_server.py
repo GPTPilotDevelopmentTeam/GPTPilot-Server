@@ -1,3 +1,4 @@
+from queue import Queue
 import socket
 import time
 
@@ -6,6 +7,7 @@ class TCPServer:
         self.host = host
         self.port = port
         self.server_socket = None
+        self.message_queue = Queue()
 
     def start_server(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,7 +20,11 @@ class TCPServer:
     def handle_client(self, conn, addr):
         print(f"Connection established with {addr}")
         while True:
-            message = "hi"
+            message = self.message_queue.get()
+            if message is None:
+                print("No message to send")
+                continue
+            print(f"Sending message to client: {message}")
             reply = ""
             message += '\0'
             try:
@@ -48,3 +54,7 @@ class TCPServer:
             print(e)
         finally:
             self.server_socket.close()
+            
+    def send_message(self, message):
+        """Send a message to the client."""
+        self.message_queue.put(message)

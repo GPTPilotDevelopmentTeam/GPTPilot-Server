@@ -18,11 +18,12 @@ log = LogSystem("stt")
 
 log('Initializing stt module...', True)
 
+VOLUME_SCALAR = 1.0
 
 THRESHOLD = 0.01
 """When the volume is lower than this value, it is considered to be silent."""
 
-SLIENCE_DURATION = 5.0
+SLIENCE_DURATION = 1.0
 """How long to pause before considering it finished (seconds)."""
 
 SAMPLE_RATE = 16000
@@ -86,35 +87,21 @@ def _monitor_microphone():
             audio_block, _ = stream.read(BLOCK_SIZE)
             audio_block = np.squeeze(audio_block)
             
-            volume_rms = np.sqrt(np.mean(audio_block**2))
+            volume_rms = np.sqrt(np.mean(audio_block**2)) * VOLUME_SCALAR
             is_silent= volume_rms < THRESHOLD
             
             if is_silent:
                 if has_speak:
                     silent_chunks += 1
-                    recording.append(audio_block)
-                    ui.set_stt_status(silence_sec=silent_chunks * (BLOCK_SIZE / SAMPLE_RATE), volume=0.0)
+                    recording.append(np.zeros(BLOCK_SIZE, dtype=np.float32))  # Append silence to maintain timing
+                    ui.set_stt_status(silence_sec=silent_chunks * (BLOCK_SIZE / SAMPLE_RATE))
             else:
                 silent_chunks = 0
                 has_speak = True
-                recording.append(audio_block)
-                ui.set_stt_status(silence_sec=0.0, volume=volume_rms)
+                recording.append(audio_block)  # Scale the audio block
+                ui.set_stt_status(silence_sec=0.0)
                 
-            ui.set_stt_status(record_sec=len(recording) * (BLOCK_SIZE / SAMPLE_RATE))
-
-            # recording.append(audio_block)
-            # ui.set_stt_status(record_sec=len(recording) * (BLOCK_SIZE / SAMPLE_RATE))
-
-            # volume_rms = np.sqrt(np.mean(audio_block**2))
-
-            # if volume_rms < THRESHOLD:
-            #     silent_chunks += 1
-            #     if  has_speak:
-            #         ui.set_stt_status(silence_sec=silent_chunks * (BLOCK_SIZE / SAMPLE_RATE), volume=0.0)
-            # else:
-            #     silent_chunks = 0  # Reset if there is sound
-            #     has_speak = True
-            #     ui.set_stt_status(silence_sec=0.0, volume=volume_rms)
+            ui.set_stt_status(record_sec=len(recording) * (BLOCK_SIZE / SAMPLE_RATE), volume=volume_rms)
 
             # === Final check for silence and speech detection ===
             # If the microphone has been silent for a certain duration
@@ -169,6 +156,10 @@ def _transcribing_audio():
         verbose_log = verbose_output.getvalue()  # Get the verbose output as a string
         verbose_output.close()
 
+        if text.strip() == "":
+            log("Transcription result is empty, skipping.", True)
+            continue
+        
         _transcription_callback(text)
         log(f"Verbose output:\n{verbose_log}")
         ui.set_stt_status(text=text)

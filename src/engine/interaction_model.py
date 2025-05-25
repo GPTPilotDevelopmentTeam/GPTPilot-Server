@@ -1,4 +1,6 @@
 from openai import OpenAI
+from threading import Thread
+from queue import Queue
 import json
 import sys
 import os
@@ -167,19 +169,29 @@ class ActionDeterminationModel:
         else:
             self._output_callback = output_callback
         
+        self.message_queue = Queue()
+        Thread(target=self._worker, args=(self.message_queue,), daemon=True).start()
         self.log = LogSystem("action_determination_model")
         self.log("Action determination model initialized.")
         
+    def _worker(self, message_queue: Queue):
+        while True:
+            message = self.message_queue.get()
+            self.log(f"Received message: {message}", True)
+            if message is None:
+                break
+            completion = self._interactor.chat.completions.create(
+                model=self._model_name,
+                temperature=self._temperature,
+                max_tokens=self._max_tokens,
+                messages=[{'role': 'system', 'content': self._prompt}, {"role": "user", "content": message}]
+            )
+            
+            self.log("Processing response from model...")
+            jsons = completion.choices[0].message.content
+            
+            self._output_callback(jsons)
+            message_queue.task_done()
+        
     def analyzing_message(self, message: str):
-        self.log(f"Received message: {message}", True)
-        completion = self._interactor.chat.completions.create(
-            model=self._model_name,
-            temperature=self._temperature,
-            max_tokens=self._max_tokens,
-            messages=[{'role': 'system', 'content': self._prompt}, {"role": "user", "content": message}]
-        )
-        
-        self.log("Processing response from model...")
-        jsons = completion.choices[0].message.content
-        
-        self._output_callback(jsons)
+        self.message_queue.put(message)

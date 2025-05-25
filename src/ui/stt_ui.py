@@ -29,7 +29,7 @@ stt_max_duration_display = tk.StringVar(value="Recording: 0.0 / 5.0 secs")
 def open_stt_settings():
     settings_win = tk.Toplevel()
     settings_win.title("STT Settings")
-    settings_win.geometry("320x250")
+    settings_win.geometry("320x320")
 
     # Threshold Slider
     tk.Label(settings_win, text="Threshold").pack()
@@ -48,11 +48,18 @@ def open_stt_settings():
     record_var = tk.DoubleVar(value=stt_state["max_duration"])
     record_slider = tk.Scale(settings_win, from_=1.0, to=10.0, resolution=0.5, orient="horizontal", variable=record_var)
     record_slider.pack(fill="x", padx=10)
+    
+    # Volume Scalar Slider
+    tk.Label(settings_win, text="Volume Scalar").pack()
+    volume_scalar_var = tk.DoubleVar(value=stt.VOLUME_SCALAR)
+    volume_scalar_slider = tk.Scale(settings_win, from_=0.1, to=50.0, resolution=0.1, orient="horizontal", variable=volume_scalar_var)
+    volume_scalar_slider.pack(fill="x", padx=10)
 
     def save_settings():
         stt.THRESHOLD = threshold_var.get()
         stt.SLIENCE_DURATION = silence_var.get()
         stt.MAX_RECORDING_DURATION = record_var.get()
+        stt.VOLUME_SCALAR = volume_scalar_var.get()
         update_stt_status(
             threshold=threshold_var.get(),
             silence_limit=silence_var.get(),
@@ -126,7 +133,7 @@ def update_stt_status(
 def _update_stt_ui():
     stt_text.set(stt_state["text"])
     stt_volume.set((stt_state["volume"] - stt_state["threshold"]) / (1.0 - stt_state["threshold"]))
-    stt_volume_label.set(f"{stt_state['volume']:.2f}")
+    stt_volume_label.set(f"{stt_state['volume']:.4f}")
     stt_threshold_display.set(f"Threshold: {stt_state['threshold']:.2f}")
     stt_silence_display.set(f"Silence: {stt_state['silence_sec']:.1f} / {stt_state['silence_limit']:.1f} secs")
     stt_max_duration_display.set(f"Recording: {stt_state['record_sec']:.1f} / {stt_state['max_duration']:.1f} secs")

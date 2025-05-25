@@ -20,14 +20,11 @@ Supported operation_name values:
 - "gear"             → Set gear (0 = up, 1 = down, -1 = off)
 - "speedbrake"       → Set speedbrake ratio (0.0 ~ 1.0)
 - "handbrake"        → Set parking brake ratio (0.0 ~ 1.0)
-- "ap_on"            → Turn autopilot on/off (0 = off, 1 = on)
 - "ap_heading"       → Set autopilot heading (degrees)
 - "ap_altitude"      → Set autopilot altitude (feet)
 - "ap_airspeed"      → Set autopilot airspeed (knots, not mach)
 - "ap_vs"            → Set vertical speed (feet per minute)
-- "ap_heading_hold"  → Enable/disable heading hold mode (1 = on, 0 = off)
-- "ap_alt_hold"      → Enable/disable altitude hold mode (1 = on, 0 = off)
-- "ap_vs_hold"       → Enable/disable vertical speed hold mode (1 = on, 0 = off)
+
 
 Examples:
 
