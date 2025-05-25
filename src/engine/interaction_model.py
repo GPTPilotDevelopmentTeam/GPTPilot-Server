@@ -177,7 +177,6 @@ class ActionDeterminationModel:
     def _worker(self, message_queue: Queue):
         while True:
             message = self.message_queue.get()
-            self.log(f"Received message: {message}", True)
             if message is None:
                 break
             completion = self._interactor.chat.completions.create(
@@ -190,8 +189,9 @@ class ActionDeterminationModel:
             self.log("Processing response from model...")
             jsons = completion.choices[0].message.content
             
+            self.log(f"Response from model: {jsons}", True)
             self._output_callback(jsons)
             message_queue.task_done()
         
-    def analyzing_message(self, message: str):
-        self.message_queue.put(message)
+    def analyzing_message(self, message: str, plane=None):
+        self.message_queue.put(f'plane state: {plane}\n\npilot\'s instruction:{message}')

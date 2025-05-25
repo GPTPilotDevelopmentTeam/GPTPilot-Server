@@ -14,19 +14,18 @@ action = ActionDeterminationModel(lambda x: server_instance.send_message(x))
 def callback(text):
     global model
     print(f'User says: {text}')
-    action.analyzing_message(text)
     gen = model.send_message(text, plane_instance)
     tts.interrupt()
     
     for g in gen:
         print(f'processing: {g}')
+        action.analyzing_message(g, plane_instance)
         tts.text_to_speech(g)
 
 
-if __name__ == '__main__':
-    stt.set_transcription_callback(callback)
-    stt.start()
-    tts.start()
-    
-    ui.run()
+stt.set_transcription_callback(callback)
+stt.start()
+tts.start()
+
+ui.run()
     
