@@ -15,7 +15,6 @@ def callback(text):
     global model
     print(f'User says: {text}')
     gen = model.send_message(text, plane_instance)
-    tts.interrupt()
     
     for g in gen:
         print(f'processing: {g}')
@@ -25,6 +24,8 @@ def callback(text):
 
 stt.set_transcription_callback(callback)
 stt.start()
+stt.register_interrupt_callback(model.interrupt)
+stt.register_interrupt_callback(tts.interrupt)
 tts.start()
 
 ui.run()

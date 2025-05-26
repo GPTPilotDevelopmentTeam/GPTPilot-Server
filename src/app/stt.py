@@ -34,6 +34,9 @@ BLOCK_SIZE = 1024
 MAX_RECORDING_DURATION = 10.0
 """Maximum recording duration (seconds)."""
 
+_interrupt_callbacks = []
+"""List of interrupt callbacks to be called when the volume is higher than the threshold."""
+
 _is_running = False
 """Flag to indicate if the audio processing is started."""
 
@@ -80,6 +83,7 @@ def _monitor_microphone():
         recording = []
         silent_chunks = 0
         has_speak = False
+        over_threshold = 0
 
         while _is_running:
             # === Read audio data from the microphone ===
@@ -92,14 +96,21 @@ def _monitor_microphone():
             
             if is_silent:
                 if has_speak:
+                    over_threshold = 0
                     silent_chunks += 1
                     recording.append(np.zeros(BLOCK_SIZE, dtype=np.float32))  # Append silence to maintain timing
                     ui.set_stt_status(silence_sec=silent_chunks * (BLOCK_SIZE / SAMPLE_RATE))
             else:
+                over_threshold += 1
                 silent_chunks = 0
                 has_speak = True
                 recording.append(audio_block)  # Scale the audio block
                 ui.set_stt_status(silence_sec=0.0)
+                
+                if over_threshold > 20:
+                    log("Volume is higher than threshold, calling interrupt callbacks.")
+                    _do_interrupt()
+                    over_threshold = 0
                 
             ui.set_stt_status(record_sec=len(recording) * (BLOCK_SIZE / SAMPLE_RATE), volume=volume_rms)
 
@@ -135,6 +146,11 @@ def _monitor_microphone():
                     record_sec=0.0
                 )
 
+def _do_interrupt():
+    global _interrupt_callbacks
+    print('[stt] interrupt')
+    for callback in _interrupt_callbacks:
+        callback()
 
 def _transcribing_audio():
     """Thread function to transcribe audio."""
@@ -160,10 +176,21 @@ def _transcribing_audio():
             log("Transcription result is empty, skipping.", True)
             continue
         
+        _do_interrupt()
         _transcription_callback(text)
         log(f"Verbose output:\n{verbose_log}")
         ui.set_stt_status(text=text)
 
+def register_interrupt_callback(callback):
+    """Register a callback function to be called when the volume is higher than the threshold.
+
+        Parameters
+        ----------
+        callback : function
+            The callback function to be called when the volume is higher than the threshold.
+    """
+    global _interrupt_callbacks
+    _interrupt_callbacks.append(callback)
 
 def set_transcription_callback(callback):
     """Set the callback function to receive the transcribed text.

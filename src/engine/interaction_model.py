@@ -118,6 +118,7 @@ class StreamInteractionModel:
             if content is None:
                 continue
             if self._is_interrupted:
+                self._memory.add_message('user', '[USER INTERRUPTED YOU]')
                 return
             
             text_buf += content
@@ -150,6 +151,11 @@ class StreamInteractionModel:
         
         self.log("Returning generator")
         return self._parse_message(stream)
+    
+    def interrupt(self):
+        """This function will interrupt the current streaming response."""
+        self.log("Interrupting the current streaming response.")
+        self._is_interrupted = True
     
 class ActionDeterminationModel:
     def __init__(self, output_callback=None):
