@@ -20,6 +20,18 @@ INFO = {
     121: ['APU is running', 'APU N1', 'APU rat', 'GPU rat', 'RAT rat', 'APU amp', 'GPU amp', 'RAT amp']
 }
 
+FLAP_VALUE = {
+    0.0: 0,
+    0.125: 1,
+    0.25: 2,
+    0.375: 5,
+    0.5: 10,
+    0.625: 15,
+    0.75: 20,
+    0.875: 30,
+    1.0: 40
+}
+
 class Plane:
     def __init__(self):
         self.data = {}
@@ -43,6 +55,8 @@ class Plane:
                 continue
             for i in range(8):
                 if i < len(INFO[k]) and INFO[k][i] is not None:
+                    if k == 13 and 'flap' in INFO[k][i]:
+                        v[i] = FLAP_VALUE.get(v[i], v[i])
                     str_list.append(f'{INFO[k][i]}: {v[i]}\n')
                     
         return ''.join(str_list)

@@ -75,7 +75,7 @@ And the value of flap is [0, 1], thus the gap between each gear is 0.125.
 0 -> 0.0
 1 -> 0.125
 2 -> 0.25
-5 -> 0.325
+5 -> 0.375
 10 -> 0.5
 15 -> 0.625
 25 -> 0.75
