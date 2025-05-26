@@ -16,10 +16,13 @@ def callback(text):
     print(f'User says: {text}')
     gen = model.send_message(text, plane_instance)
     
+    gen_text = ""
     for g in gen:
         print(f'processing: {g}')
-        action.analyzing_message(g, plane_instance)
         tts.text_to_speech(g)
+        gen_text += g
+
+    action.analyzing_message(gen_text, plane=plane_instance)
 
 
 stt.set_transcription_callback(callback)
