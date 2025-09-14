@@ -1,0 +1,37 @@
+[preflight]
+DOORS..........................................
+WINDOW HEAT......................................
+FIRE WARN TEST....................
+FLAP..............15 DEGREES
+PARKING BRAKE...................................RELEASE
+ALTITUDE......................8000 FEETS
+
+[climbing]
+GEAR.................UP
+VS...................1000 FEETS / MIN
+SPEED.................250 KNOT
+FLAP.................5 DEGREES
+ENGINE STATUS...............
+
+[engine fire]
+MONITOR ENGINE POWER
+THROTTLE........................................IDLE
+ENGINE MASTER SWITCH.....................OFF
+FUEL VALVE.....................................CLOSE
+FIRE HANDLE....................................PULL
+FIRE EXTINGUISHER..............................ACTIVATE
+MONITOR ENGINE TEMP & POWER
+
+[landing]
+LANDING GEAR.............................DOWN
+FLAP.....................................FULL
+SPEED............................150
+ALTITUDE.........................CHECK
+RUNWAY...........................IN SIGHT
+AIRSPEED & DESCENT RATE.........CHECK
+
+[touch down]
+PARKING_BRAKE....................................0.5
+SPEED_BRAKE.....................FULL
+REVERSE THRUST....................AS NEEDED
+SPEED.............................REDUCE TO TAXI SPEED

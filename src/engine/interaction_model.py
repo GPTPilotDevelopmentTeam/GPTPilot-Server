@@ -124,12 +124,19 @@ class StreamInteractionModel:
             text_buf += content
 
             if '[END]' in text_buf:
+                if '[SKIP]' in text_buf:
+                    self.log("[SKIP]", True)
+                    continue
                 text_buf = text_buf.replace('[END]', '')
                 self._memory.add_message('assistant', text_buf)
                 yield text_buf
                 text_buf = ""
         
         if len(text_buf) > 0:
+            if '[SKIP]' in text_buf:
+                self.log("[SKIP]", True)
+                return ''
+            
             text_buf = text_buf.replace('[END]', '')
             self._memory.add_message('assistant', text_buf)
             yield text_buf

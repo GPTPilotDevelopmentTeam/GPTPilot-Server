@@ -107,7 +107,7 @@ def _monitor_microphone():
                 recording.append(audio_block)  # Scale the audio block
                 ui.set_stt_status(silence_sec=0.0)
                 
-                if over_threshold > 20:
+                if over_threshold > 10:
                     log("Volume is higher than threshold, calling interrupt callbacks.")
                     _do_interrupt()
                     over_threshold = 0
